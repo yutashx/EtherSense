@@ -12,7 +12,8 @@ import cv2
 print('Number of arguments:', len(sys.argv), 'arguments.')
 print('Argument List:', str(sys.argv))
 mc_ip_address = '224.0.0.1'
-local_ip_address = '192.168.0.1'
+#local_ip_address = '192.168.0.1'
+local_ip_address = 'localhost'
 port = 1024
 chunk_size = 4096
 
@@ -53,7 +54,10 @@ class ImageClient(asyncore.dispatcher):
         # convert the frame from string to numerical data
         imdata = pickle.loads(self.buffer)
         bigDepth = cv2.resize(imdata, (0,0), fx=2, fy=2, interpolation=cv2.INTER_NEAREST) 
-        cv2.putText(bigDepth, str(self.timestamp), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (65536), 2, cv2.LINE_AA)
+        timestamp = str(self.timestamp[0]).replace('.', '_')
+        cv2.imwrite(f"savedata/{timestamp}.png", bigDepth)
+        print(f"save {timestamp}.png")
+        cv2.putText(bigDepth, timestamp, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (65536), 2, cv2.LINE_AA)
         cv2.imshow("window"+str(self.windowName), bigDepth)
         cv2.waitKey(1)
         self.buffer = bytearray()

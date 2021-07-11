@@ -19,7 +19,7 @@ chunk_size = 4096
 
 def main(argv):
     multi_cast_message(mc_ip_address, port, 'EtherSensePing')
-        
+
 
 #UDP client for each camera server 
 class ImageClient(asyncore.dispatcher):
@@ -33,7 +33,7 @@ class ImageClient(asyncore.dispatcher):
         cv2.namedWindow("window"+str(self.windowName))
         self.remainingBytes = 0
         self.frame_id = 0
-       
+
     def handle_read(self):
         if self.remainingBytes == 0:
             # get the expected frame size
@@ -41,7 +41,7 @@ class ImageClient(asyncore.dispatcher):
             # get the timestamp of the current frame
             self.timestamp = struct.unpack('<d', self.recv(8))
             self.remainingBytes = self.frame_length
-        
+
         # request the frame data until the frame is completely in buffer
         data = self.recv(self.remainingBytes)
         self.buffer += data
@@ -51,8 +51,7 @@ class ImageClient(asyncore.dispatcher):
             self.handle_frame()
 
     def handle_frame(self):
-        # convert the frame from string to numerical data
-        imdata = pickle.loads(self.buffer)
+        # convert the frame from string to numerical data imdata = pickle.loads(self.buffer)
         bigDepth = cv2.resize(imdata, (0,0), fx=2, fy=2, interpolation=cv2.INTER_NEAREST) 
         timestamp = str(self.timestamp[0]).replace('.', '_')
         cv2.imwrite(f"savedata/{timestamp}.png", bigDepth)
@@ -65,7 +64,7 @@ class ImageClient(asyncore.dispatcher):
     def readable(self):
         return True
 
-    
+
 class EtherSenseClient(asyncore.dispatcher):
     def __init__(self):
         asyncore.dispatcher.__init__(self)
@@ -73,7 +72,7 @@ class EtherSenseClient(asyncore.dispatcher):
         # create a socket for TCP connection between the client and server
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(5)
-        
+
         self.bind(self.server_address) 	
         self.listen(10)
 
@@ -82,7 +81,7 @@ class EtherSenseClient(asyncore.dispatcher):
 
     def readable(self):
         return True
-        
+
     def handle_connect(self):
         print("connection recvied")
 
@@ -104,13 +103,13 @@ def multi_cast_message(ip_address, port, message):
         # Send data to the multicast group
         print('sending "%s"' % message + str(multicast_group))
         sent = sock.sendto(message.encode(), multicast_group)
-   
+
         # defer waiting for a response using Asyncore
         client = EtherSenseClient()
         asyncore.loop()
 
         # Look for responses from all recipients
-        
+
     except socket.timeout:
         print('timed out, no more responses')
     finally:
